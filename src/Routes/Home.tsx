@@ -1,27 +1,27 @@
 import { useQuery } from "react-query";
-import { getMoives, IGetMoives, popularMovie } from "../api";
 import styled from "styled-components";
+import {
+  motion,
+  AnimatePresence,
+  useViewportScroll,
+  useScroll,
+} from "framer-motion";
+import { getMoives, IGetMoives } from "../api";
 import { makeImage } from "../utilites";
-import { motion, AnimatePresence, useScroll } from "framer-motion";
 import { useState } from "react";
-import { useMatch, useNavigate, useParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { Navigate, useMatch, useNavigate } from "react-router-dom";
 const Wrapper = styled.div`
-  background-color: black;
+  background: black;
   padding-bottom: 200px;
-  height: 400vh;
 `;
-
 const Loader = styled.div`
   height: 20vh;
   display: flex;
   justify-content: center;
   align-items: center;
 `;
-
 const Banner = styled.div<{ bgphoto: string }>`
   height: 100vh;
-  background-color: red;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -32,36 +32,32 @@ const Banner = styled.div<{ bgphoto: string }>`
 `;
 const Title = styled.h2`
   font-size: 68px;
-  margin-bottom: 20px;
+  margin-bottom: 20px; ;
 `;
 const Overview = styled.p`
   font-size: 30px;
   width: 50%;
 `;
-
 const Slider = styled.div`
   position: relative;
-  top: -80px;
-  margin-bottom: 200px;
+  top: -100px;
+  height: 200px;
 `;
-
-const RowDiv = styled(motion.div)`
+const Row = styled(motion.div)`
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
   gap: 5px;
-  margin-bottom: 5px;
+  grid-template-columns: repeat(6, 1fr);
   position: absolute;
   width: 100%;
-  cursor: pointer;
 `;
 const Box = styled(motion.div)<{ bgphoto: string }>`
   background-color: white;
-  height: 150px;
-  color: white;
-  font-size: 64px;
   background-image: url(${(props) => props.bgphoto});
   background-size: cover;
   background-position: center center;
+  height: 200px;
+  font-size: 66px;
+  cursor: pointer;
   &:first-child {
     transform-origin: center left;
   }
@@ -69,35 +65,6 @@ const Box = styled(motion.div)<{ bgphoto: string }>`
     transform-origin: center right;
   }
 `;
-
-const rowVar = {
-  initial: {
-    x: window.outerWidth - 25,
-  },
-  animate: {
-    x: 0,
-  },
-  exit: {
-    x: -window.outerWidth + 25,
-  },
-};
-
-const offset = 6;
-
-const boxVariants = {
-  normal: {
-    scale: 1,
-  },
-  hover: {
-    scale: 1.3,
-    y: -80,
-    transition: {
-      delay: 0.5,
-      duaration: 0.1,
-      type: "tween",
-    },
-  },
-};
 const Info = styled(motion.div)`
   padding: 10px;
   background-color: ${(props) => props.theme.black.lighter};
@@ -110,26 +77,14 @@ const Info = styled(motion.div)`
     font-size: 18px;
   }
 `;
-
-const infoVariants = {
-  hover: {
-    opacity: 1,
-    transition: {
-      delay: 0.5,
-      duaration: 0.1,
-      type: "tween",
-    },
-  },
-};
 const Overlay = styled(motion.div)`
   position: fixed;
   top: 0;
-  height: 100%;
   width: 100%;
+  height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   opacity: 0;
 `;
-
 const BigMovie = styled(motion.div)`
   position: absolute;
   width: 40vw;
@@ -141,6 +96,7 @@ const BigMovie = styled(motion.div)`
   overflow: hidden;
   background-color: ${(props) => props.theme.black.lighter};
 `;
+
 const BigCover = styled.div`
   width: 100%;
   background-size: cover;
@@ -162,49 +118,150 @@ const BigOverview = styled.p`
   top: -80px;
   color: ${(props) => props.theme.white.lighter};
 `;
+interface IrowVariants {
+  resize: number;
+  back: boolean;
+}
 
-const H2 = styled.div`
-  font-size: 24px;
-  font-weight: 800;
-  margin-bottom: 20px;
-  margin-left: 10px;
-  color: rgb(255, 255, 255);
-  text-transform: uppercase;
+const rowVariants = {
+  hidden: ({ resize, back }: IrowVariants) => ({
+    x: back
+      ? resize
+        ? -resize
+        : -window.innerWidth
+      : resize
+      ? resize
+      : window.innerWidth,
+  }),
+  visible: {
+    x: 0,
+  },
+  exit: ({ resize, back }: IrowVariants) => ({
+    x: back
+      ? resize
+        ? resize
+        : window.innerWidth
+      : resize
+      ? -resize
+      : -window.innerWidth,
+  }),
+};
+const boxVariants = {
+  normal: {
+    scale: 1,
+  },
+  hover: {
+    scale: 1.3,
+    y: -80,
+    transition: {
+      delay: 0.5,
+      duaration: 0.1,
+      type: "tween",
+    },
+  },
+};
+const infoVariants = {
+  hover: {
+    opacity: 1,
+    transition: {
+      delay: 0.5,
+      duaration: 0.1,
+      type: "tween",
+    },
+  },
+};
+const LeftArrow = styled.div`
+  position: absolute;
+  left: 0px;
+  background-color: rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  display: flex;
+  -webkit-box-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  justify-content: center;
+  height: 100%;
+  width: 40px;
+  border: none;
+  z-index: 2;
+  color: rgb(229, 229, 229);
+  svg {
+    width: 40px;
+    height: 40px;
+  }
+  path {
+    box-sizing: border-box;
+  }
 `;
 
-const Home = () => {
-  const setNavigate = useNavigate();
-  const MovieIdMatch = useMatch("movie/:movieId");
-  const { isLoading, data } = useQuery<IGetMoives>(
-    ["movie", "nowPlaying"],
+const RightArrow = styled.div`
+  position: absolute;
+  right: 0px;
+  background-color: rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  display: flex;
+  -webkit-box-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  justify-content: center;
+  height: 100%;
+  width: 40px;
+  border: none;
+  z-index: 2;
+  color: rgb(229, 229, 229);
+  svg {
+    width: 40px;
+    height: 40px;
+  }
+  path {
+    box-sizing: border-box;
+  }
+`;
+const offset = 6;
+function Home() {
+  const [resize, setResize] = useState(window.innerWidth);
+  window.onresize = () => setResize(window.innerWidth);
+  const navigate = useNavigate();
+  const bigMovieMatch = useMatch("/movie/:movieId");
+  const { scrollY } = useScroll();
+  const { data, isLoading } = useQuery<IGetMoives>(
+    ["movies", "nowPlaying"],
     getMoives
   );
   const [index, setIndex] = useState(0);
-  const increaseIndex = () => {
-    if (leaving) return;
+  const [leaving, setLeaving] = useState(false);
+  const [back, setBack] = useState(false);
+  const incraseIndex = () => {
     if (data) {
+      if (leaving) {
+      }
       toggleLeaving();
-      const totalMovies = data?.results.length - 1;
+      const totalMovies = data.results.length - 1;
       const maxIndex = Math.floor(totalMovies / offset) - 1;
       setIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
     }
   };
-  const [leaving, setLeaving] = useState(false);
-  const toggleLeaving = () => {
-    setLeaving((prev) => !prev);
+  const decreraseIndex = () => {
+    if (data) {
+      if (leaving) {
+        setBack((prev) => prev);
+      }
+      toggleLeaving();
+      const totalMovies = data.results.length - 1;
+      const maxIndex = Math.floor(totalMovies / offset) - 1;
+      setIndex((prev) => (prev === 0 ? maxIndex : prev - 1));
+      setBack(true);
+    }
   };
-  const onBoxClick = (movieId: number) => {
-    setNavigate(`/movie/${movieId}`);
+  const toggleLeaving = () => setLeaving((prev) => !prev);
+  const onBoxClicked = (movieId: number) => {
+    navigate(`/movie/${movieId}`);
   };
-  const onOverlayClick = () => {
-    setNavigate("/");
-  };
-
-  const { scrollY } = useScroll();
+  const onOverlayClick = () => navigate("/");
   const clickedMovie =
-    MovieIdMatch?.params.movieId &&
+    bigMovieMatch?.params.movieId &&
     data?.results.find(
-      (movie) => movie.id + "" === MovieIdMatch.params.movieId
+      (movie) => movie.id + "" === bigMovieMatch.params.movieId
     );
   return (
     <Wrapper>
@@ -213,7 +270,7 @@ const Home = () => {
       ) : (
         <>
           <Banner
-            onClick={increaseIndex}
+            onClick={incraseIndex}
             bgphoto={makeImage(data?.results[0].backdrop_path || "")}
           >
             <Title>{data?.results[0].title}</Title>
@@ -221,11 +278,11 @@ const Home = () => {
           </Banner>
           <Slider>
             <AnimatePresence initial={false} onExitComplete={toggleLeaving}>
-              <H2>now Playing</H2>
-              <RowDiv
-                variants={rowVar}
-                initial="initial"
-                animate="animate"
+              <Row
+                custom={{ resize, back }}
+                variants={rowVariants}
+                initial="hidden"
+                animate="visible"
                 exit="exit"
                 transition={{ type: "tween", duration: 1 }}
                 key={index}
@@ -240,7 +297,7 @@ const Home = () => {
                       whileHover="hover"
                       initial="normal"
                       variants={boxVariants}
-                      onClick={() => onBoxClick(movie.id)}
+                      onClick={() => onBoxClicked(movie.id)}
                       transition={{ type: "tween" }}
                       bgphoto={makeImage(movie.backdrop_path, "w500")}
                     >
@@ -249,29 +306,38 @@ const Home = () => {
                       </Info>
                     </Box>
                   ))}
-              </RowDiv>
+              </Row>
             </AnimatePresence>
+            <LeftArrow onClick={decreraseIndex}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 256 512"
+                fill="currentColor"
+              >
+                <path d="M137.4 406.6l-128-127.1C3.125 272.4 0 264.2 0 255.1s3.125-16.38 9.375-22.63l128-127.1c9.156-9.156 22.91-11.9 34.88-6.943S192 115.1 192 128v255.1c0 12.94-7.781 24.62-19.75 29.58S146.5 415.8 137.4 406.6z"></path>
+              </svg>
+            </LeftArrow>
+            <RightArrow onClick={incraseIndex}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 256 512"
+                fill="currentColor"
+              >
+                <path d="M118.6 105.4l128 127.1C252.9 239.6 256 247.8 256 255.1s-3.125 16.38-9.375 22.63l-128 127.1c-9.156 9.156-22.91 11.9-34.88 6.943S64 396.9 64 383.1V128c0-12.94 7.781-24.62 19.75-29.58S109.5 96.23 118.6 105.4z"></path>
+              </svg>
+            </RightArrow>
           </Slider>
           <AnimatePresence>
-            {MovieIdMatch ? (
+            {bigMovieMatch ? (
               <>
                 <Overlay
+                  onClick={onOverlayClick}
                   exit={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  onClick={onOverlayClick}
-                ></Overlay>
+                />
                 <BigMovie
-                  layoutId={MovieIdMatch.params.movieId}
-                  style={{
-                    position: "absolute",
-                    width: "40vw",
-                    height: "80vh",
-                    backgroundColor: "rgba(0,0,0,0.5)",
-                    top: scrollY.get() + 100,
-                    left: 0,
-                    right: 0,
-                    margin: "0 auto",
-                  }}
+                  style={{ top: scrollY.get() + 100 }}
+                  layoutId={bigMovieMatch.params.movieId}
                 >
                   {clickedMovie && (
                     <>
@@ -291,43 +357,9 @@ const Home = () => {
               </>
             ) : null}
           </AnimatePresence>
-          <Slider>
-            <AnimatePresence initial={false} onExitComplete={toggleLeaving}>
-              <H2>now Playing</H2>
-              <RowDiv
-                variants={rowVar}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                transition={{ type: "tween", duration: 1 }}
-                key={index}
-              >
-                {data?.results
-                  .slice(1)
-                  .slice(offset * index, offset * index + offset)
-                  .map((movie) => (
-                    <Box
-                      layoutId={movie.id + ""}
-                      key={movie.id}
-                      whileHover="hover"
-                      initial="normal"
-                      variants={boxVariants}
-                      onClick={() => onBoxClick(movie.id)}
-                      transition={{ type: "tween" }}
-                      bgphoto={makeImage(movie.backdrop_path, "w500")}
-                    >
-                      <Info variants={infoVariants}>
-                        <h4>{movie.title}</h4>
-                      </Info>
-                    </Box>
-                  ))}
-              </RowDiv>
-            </AnimatePresence>
-          </Slider>
         </>
       )}
     </Wrapper>
   );
-};
-
+}
 export default Home;
