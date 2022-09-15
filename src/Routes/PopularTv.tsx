@@ -210,7 +210,7 @@ const PopularTv = () => {
   const [resize, setResize] = useState(window.innerWidth);
   window.onresize = () => setResize(window.innerWidth);
   const navigate = useNavigate();
-  const bigTvMatch = useMatch("/tv/top/:tvId");
+  const bigTvMatch = useMatch("/tv/popular/:tvId");
   const { scrollY } = useScroll();
   const [index, setIndex] = useState(0);
   const [leaving, setLeaving] = useState(false);
@@ -242,7 +242,7 @@ const PopularTv = () => {
     bigTvMatch?.params.tvId &&
     data?.results.find((movie) => movie.id + 1 + "" === bigTvMatch.params.tvId);
   const onBoxClicked = async (tvId: number) => {
-    await navigate(`/tv/top/${tvId}`);
+    await navigate(`/tv/popular/${tvId}`);
   };
   return (
     <>
@@ -250,7 +250,7 @@ const PopularTv = () => {
         <Loader>Loading...</Loader>
       ) : (
         <Slider>
-          <H2>Now Playing</H2>
+          <H2>Popular</H2>
           <AnimatePresence initial={false} onExitComplete={toggleLeaving}>
             <Row
               custom={{ resize, back }}

@@ -250,7 +250,7 @@ const TopTv = () => {
         <Loader>Loading...</Loader>
       ) : (
         <Slider>
-          <H2>Now Playing</H2>
+          <H2>Top</H2>
           <AnimatePresence initial={false} onExitComplete={toggleLeaving}>
             <Row
               custom={{ resize, back }}
