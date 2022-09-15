@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.js": "/typescript-movie/static/js/main.14d70703.js",
+    "main.js": "/typescript-movie/static/js/main.a18d455c.js",
     "index.html": "/typescript-movie/index.html",
-    "main.14d70703.js.map": "/typescript-movie/static/js/main.14d70703.js.map"
+    "main.a18d455c.js.map": "/typescript-movie/static/js/main.a18d455c.js.map"
   },
   "entrypoints": [
-    "static/js/main.14d70703.js"
+    "static/js/main.a18d455c.js"
   ]
 }
