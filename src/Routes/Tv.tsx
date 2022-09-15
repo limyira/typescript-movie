@@ -39,7 +39,6 @@ interface IrowVariants {
 }
 const Tv = () => {
   const { isLoading, data } = useQuery<ILatestTv>(["latestTv"], LatestTv);
-  console.log(data);
   return (
     <Wrapper>
       {isLoading ? (

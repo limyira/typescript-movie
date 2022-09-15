@@ -3,7 +3,6 @@ import Header from "./Components/Header";
 import Home from "./Routes/Home";
 import Search from "./Routes/Search";
 import Tv from "./Routes/Tv";
-import Movie from "./Routes/Movie";
 import Popular from "./Routes/Popular";
 import NowPlaying from "./Routes/Nowplaying";
 import TopTv from "./Routes/Top";

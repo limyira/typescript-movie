@@ -8,7 +8,6 @@ import { makeImage } from "../utilites";
 import { useMatch } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useScroll } from "framer-motion";
-import Movie from "./Movie";
 export interface IPopularMovie {
   adult: boolean;
   backdrop_path: string;
